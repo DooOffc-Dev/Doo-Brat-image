@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DooOffc - Brat Img</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/twemoji@14.0.2/dist/twemoji.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Inter', system-ui, sans-serif; }
+
+        :root {
+            --bg-body: #03080f;
+            --bg-container: #0a121e;
+            --border-container: #0f2440;
+            --bg-input: #0d1622;
+            --text-main: #c9d1d9;
+            --text-muted: #6e7a8a;
+            --accent: #1f6feb;
+            --accent-glow: rgba(31, 111, 235, 0.25);
+            --shadow-dark: rgba(0,0,0,0.9);
+            --toggle-bg: #0a121e;
+            --toggle-border: #1f6feb;
+            --toggle-icon: #ffffff;
+        }
+
+        body.light-mode {
+            --bg-body: #f0f4f8;
+            --bg-container: #ffffff;
+            --border-container: #cbd5e1;
+            --bg-input: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --accent: #2563eb;
+            --accent-glow: rgba(37, 99, 235, 0.15);
+            --shadow-dark: rgba(0,0,0,0.1);
+            --toggle-bg: #ffffff;
+            --toggle-border: #2563eb;
+            --toggle-icon: #0a121e;
+        }
+
+        body { background: var(--bg-body); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; transition: background 0.3s ease; }
+
+        .container { max-width: 850px; width: 100%; background: var(--bg-container); border-radius: 28px; padding: 30px 28px 20px 28px; box-shadow: 0 20px 50px var(--shadow-dark), 0 0 0 1px var(--border-container); border: 1px solid var(--border-container); position: relative; transition: 0.3s; }
+
+        .theme-toggle { position: absolute; top: 14px; right: 20px; background: var(--toggle-bg); border: 2px solid var(--toggle-border); border-radius: 50%; width: 44px; height: 44px; cursor: pointer; font-size: 1.2rem; color: var(--toggle-icon); transition: 0.3s; z-index: 20; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 12px var(--accent-glow); }
+        .theme-toggle:hover { transform: scale(1.1); box-shadow: 0 0 20px var(--accent-glow); }
+
+        .music-logo { position: absolute; bottom: 20px; right: 28px; background: var(--toggle-bg); border: 2px solid var(--toggle-border); border-radius: 50%; width: 44px; height: 44px; cursor: pointer; font-size: 1.2rem; color: var(--toggle-icon); transition: 0.3s; opacity: 0.9; z-index: 15; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 12px var(--accent-glow); user-select: none; }
+        .music-logo:hover { opacity: 1; transform: scale(1.1); box-shadow: 0 0 20px var(--accent-glow); }
+
+        .window-dots { position: absolute; top: 14px; left: 20px; display: flex; gap: 8px; z-index: 10; }
+        .dot { width: 14px; height: 14px; border-radius: 50%; box-shadow: 0 0 6px rgba(0,0,0,0.6); transition: 0.2s; }
+        .dot-red { background: #ff5f57; box-shadow: 0 0 8px #ff5f5740; }
+        .dot-yellow { background: #febc2e; box-shadow: 0 0 8px #febc2e40; }
+        .dot-green { background: #28c840; box-shadow: 0 0 8px #28c84040; }
+        .dot:hover { filter: brightness(1.3); transform: scale(1.1); }
+
+        .header { display: flex; justify-content: center; align-items: center; flex-direction: column; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--border-container); padding-bottom: 14px; padding-top: 8px; position: relative; }
+        .header-title { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center; }
+        .header-title h1 { color: var(--accent); font-size: 1.8rem; font-weight: 700; letter-spacing: -0.5px; text-shadow: 0 0 12px var(--accent-glow); margin: 0; }
+        .header-title span { color: var(--text-muted); font-size: 0.85rem; background: var(--bg-input); padding: 5px 16px; border-radius: 40px; border: 1px solid var(--border-container); }
+
+        .preview-area { background: var(--bg-input); border-radius: 18px; padding: 16px; margin: 16px 0 20px; border: 1px solid var(--border-container); display: flex; justify-content: center; align-items: center; min-height: 280px; position: relative; overflow: hidden; }
+        #bratCanvas { max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 8px 30px var(--shadow-dark); display: block; background: var(--bg-body); }
+
+        .control-group { display: flex; flex-direction: column; gap: 16px; margin-top: 8px; }
+        
+        textarea { width: 100%; background: var(--bg-input); border: 3px solid var(--accent); border-radius: 18px; padding: 18px 20px; color: var(--text-main); font-size: 1.2rem; resize: vertical; min-height: 80px; transition: 0.3s; font-family: inherit; outline: none; box-shadow: 0 0 15px var(--accent-glow); }
+        textarea:focus { border-color: #58a6ff; box-shadow: 0 0 25px var(--accent-glow); background: var(--bg-body); }
+        textarea::placeholder { color: var(--text-muted); font-size: 1.2rem; font-weight: 400; opacity: 0.9; }
+
+        .settings-row { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+        .settings-row label { color: var(--text-main); font-size: 0.95rem; font-weight: 500; display: flex; align-items: center; gap: 8px; flex: 1 1 150px; }
+        .settings-row select, .settings-row input { background: var(--bg-input); border: 1px solid var(--border-container); color: var(--text-main); padding: 10px 14px; border-radius: 12px; font-size: 0.95rem; outline: none; cursor: pointer; flex: 1; min-width: 80px; }
+        .settings-row select:focus, .settings-row input:focus { border-color: var(--accent); }
+        
+        .action-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 4px; }
+        .btn { background: var(--accent); border: none; padding: 14px 32px; border-radius: 40px; font-weight: 700; font-size: 1rem; color: #ffffff; cursor: pointer; transition: 0.25s; flex: 1 1 auto; min-width: 140px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px var(--accent-glow); }
+        .btn:hover { transform: scale(1.02); background: #2a7bef; }
+        .btn:active { transform: scale(0.97); }
+        .btn-secondary { background: var(--bg-input); color: var(--text-main); box-shadow: none; border: 1px solid var(--border-container); }
+        .btn-secondary:hover { background: var(--bg-body); border-color: var(--accent); }
+        .btn-download { background: transparent; border: 2px solid var(--accent); color: var(--accent); box-shadow: none; }
+        .btn-download:hover { background: var(--accent); color: #ffffff; }
+
+        .info-badge { color: var(--text-muted); font-size: 0.8rem; text-align: center; margin-top: 18px; border-top: 1px solid var(--border-container); padding-top: 18px; display: flex; flex-direction: column; gap: 8px; padding-bottom: 30px; }
+        .info-badge .copyright { font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.3px; }
+        .info-badge .social-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; font-size: 0.85rem; }
+        .info-badge a { color: var(--accent); text-decoration: none; font-weight: 500; transition: 0.2s; }
+        .info-badge a:hover { color: var(--text-muted); text-decoration: underline; }
+        .info-badge .divider { color: var(--border-container); }
+
+        @media (max-width: 600px) {
+            .container { padding: 20px 16px; }
+            .header-title h1 { font-size: 1.4rem; }
+            .header-title span { font-size: 0.75rem; }
+            .btn { padding: 12px 20px; font-size: 0.9rem; min-width: 100px; }
+            .preview-area { min-height: 200px; padding: 10px; }
+            .dot { width: 12px; height: 12px; }
+            .window-dots { top: 12px; left: 16px; gap: 6px; }
+            .theme-toggle { top: 12px; right: 16px; width: 38px; height: 38px; font-size: 1rem; }
+            .music-logo { bottom: 14px; right: 18px; width: 38px; height: 38px; font-size: 1rem; }
+            .header { padding-top: 6px; }
+            .info-badge { font-size: 0.7rem; padding-bottom: 40px; }
+            .info-badge .social-links { font-size: 0.75rem; gap: 4px 10px; }
+            textarea { font-size: 1rem; padding: 14px 16px; min-height: 70px; }
+            textarea::placeholder { font-size: 1rem; }
+            .settings-row { flex-direction: column; align-items: stretch; }
+            .settings-row label { flex: 1; }
+        }
+
+        @media (max-width: 400px) {
+            .action-row { flex-direction: column; }
+            .btn { width: 100%; }
+            .info-badge .social-links { flex-direction: column; gap: 4px; }
+            .music-logo { bottom: 10px; right: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <button class="theme-toggle" id="themeToggle">
+        <i class="fas fa-sun"></i>
+    </button>
+
+    <div class="window-dots">
+        <div class="dot dot-red"></div>
+        <div class="dot dot-yellow"></div>
+        <div class="dot dot-green"></div>
+    </div>
+
+    <div class="header">
+        <div class="header-title">
+            <h1>DooOffc · Brat Img</h1>
+            <span>Canvas Edition</span>
+        </div>
+    </div>
+
+    <div class="preview-area">
+        <canvas id="bratCanvas" width="1000" height="1000"></canvas>
+    </div>
+
+    <div class="control-group">
+        <textarea id="textInput" placeholder="Masukkan teks disini..."></textarea>
+        
+        <div class="settings-row">
+            <label>Theme
+                <select id="themeSelect">
+                    <option value="white">White</option>
+                    <option value="black">Black</option>
+                    <option value="green">Green</option>
+                </select>
+            </label>
+            <label>Blur
+                <select id="blurSelect">
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                </select>
+            </label>
+        </div>
+
+        <div class="action-row">
+            <button class="btn" id="generateBtn">Generate</button>
+            <button class="btn btn-secondary" id="resetBtn">Reset</button>
+            <button class="btn btn-download" id="downloadBtn">Download PNG</button>
+        </div>
+    </div>
+
+    <button class="music-logo" id="musicLogo">
+        <i class="fas fa-play"></i>
+    </button>
+
+    <div class="info-badge">
+        <div class="copyright">
+            Copyright © 2026 DooOfficiall - All Rights Reserved
+        </div>
+        <div class="social-links">
+            <span>TikTok: <a href="https://www.tiktok.com/@doostyle_18" target="_blank">@doostyle_18</a></span>
+            <span class="divider">|</span>
+            <span>IG: <a href="https://www.instagram.com/17doo_yea" target="_blank">@17doo_yea</a></span>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    (function() {
+        const canvas = document.getElementById('bratCanvas');
+        const ctx = canvas.getContext('2d');
+        const textInput = document.getElementById('textInput');
+        const themeSelect = document.getElementById('themeSelect');
+        const blurSelect = document.getElementById('blurSelect');
+        const generateBtn = document.getElementById('generateBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const themeToggle = document.getElementById('themeToggle');
+        const musicLogo = document.getElementById('musicLogo');
+
+        // Audio
+        let audioPlayer = null;
+        let isPlaying = false;
+        const MUSIC_URL = 'doo/doosound.mp3';
+
+        function initAudio() {
+            if (!MUSIC_URL) return;
+            audioPlayer = new Audio(MUSIC_URL);
+            audioPlayer.loop = true;
+            audioPlayer.volume = 0.5;
+        }
+        musicLogo.addEventListener('click', () => {
+            if (!audioPlayer) initAudio();
+            if (!audioPlayer) return;
+            if (isPlaying) {
+                audioPlayer.pause();
+                isPlaying = false;
+                musicLogo.innerHTML = '<i class="fas fa-play"></i>';
+            } else {
+                audioPlayer.play().catch(() => {});
+                isPlaying = true;
+                musicLogo.innerHTML = '<i class="fas fa-pause"></i>';
+            }
+        });
+
+        // Theme toggle
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('light-mode');
+            if (document.body.classList.contains('light-mode')) {
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+            } else {
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            }
+        });
+
+        const THEMES = {
+            black: { bg: '#000000', text: '#ffffff' },
+            white: { bg: '#ffffff', text: '#000000' },
+            green: { bg: '#8ace00', text: '#000000' }
+        };
+
+        const SIZE = 1000;
+        const PADDING = 80;
+        const LINE_GAP = 20;
+        const MAX_W = SIZE - PADDING * 2;
+        const MAX_H = SIZE - PADDING * 2;
+
+        function wrapText(ctx, text, maxWidth, fontSize) {
+            ctx.font = `${fontSize}px Arial, sans-serif`;
+            const words = text.split(' ');
+            const lines = [];
+            let cur = '';
+            for (const word of words) {
+                const test = cur ? cur + ' ' + word : word;
+                if (ctx.measureText(test).width > maxWidth && cur) {
+                    lines.push(cur);
+                    cur = word;
+                } else {
+                    cur = test;
+                }
+            }
+            if (cur) lines.push(cur);
+            return lines;
+        }
+
+        function fitsAt(ctx, text, fontSize, maxWidth, maxHeight, lineGap) {
+            const lines = wrapText(ctx, text, maxWidth, fontSize);
+            const totalHeight = lines.length * (fontSize + lineGap) - lineGap;
+            return totalHeight <= maxHeight;
+        }
+
+        function findBestFontSize(ctx, text, maxWidth, maxHeight, lineGap) {
+            let lo = 10, hi = 700, best = lo;
+            while (lo <= hi) {
+                const mid = Math.floor((lo + hi) / 2);
+                if (fitsAt(ctx, text, mid, maxWidth, maxHeight, lineGap)) {
+                    best = mid;
+                    lo = mid + 1;
+                } else {
+                    hi = mid - 1;
+                }
+            }
+            return best;
+        }
+
+        async function getEmojiImageUrl(emoji) {
+            return new Promise((resolve) => {
+                const html = twemoji.parse(emoji, { folder: 'svg', ext: '.svg', size: '72x72' });
+                const match = html.match(/src="([^"]+)"/);
+                if (match) {
+                    const img = new Image();
+                    img.crossOrigin = 'anonymous';
+                    img.onload = () => resolve(img);
+                    img.onerror = () => resolve(null);
+                    img.src = match[1];
+                } else {
+                    resolve(null);
+                }
+            });
+        }
+
+        async function drawTextWithEmojis(ctx, text, x, y, fontSize, textColor) {
+            const parts = text.split(/(\p{Emoji_Presentation}|\p{Emoji}\uFE0F|[\u{1F1E0}-\u{1F1FF}]{2})/gu);
+            let curX = x;
+            ctx.textBaseline = 'alphabetic';
+
+            for (const part of parts) {
+                if (!part) continue;
+                if (/\p{Emoji}/gu.test(part)) {
+                    const img = await getEmojiImageUrl(part);
+                    if (img) {
+                        ctx.drawImage(img, curX, y - fontSize, fontSize, fontSize);
+                    } else {
+                        ctx.fillStyle = textColor;
+                        ctx.fillText(part, curX, y);
+                    }
+                    curX += fontSize;
+                } else {
+                    ctx.fillStyle = textColor;
+                    ctx.fillText(part, curX, y);
+                    curX += ctx.measureText(part).width;
+                }
+            }
+        }
+
+        async function generateBrat() {
+            const text = textInput.value.trim();
+            const themeKey = themeSelect.value;
+            const blurVal = parseInt(blurSelect.value) || 0;
+            const selectedTheme = THEMES[themeKey] || THEMES.white;
+
+            const w = SIZE, h = SIZE;
+            ctx.clearRect(0, 0, w, h);
+            ctx.fillStyle = selectedTheme.bg;
+            ctx.fillRect(0, 0, w, h);
+
+            // Jika teks kosong, jangan generate apa-apa (biar gambar kosong)
+            if (!text) {
+                return;
+            }
+
+            const fontSize = findBestFontSize(ctx, text, MAX_W, MAX_H, LINE_GAP);
+            const lines = wrapText(ctx, text, MAX_W, fontSize);
+
+            ctx.save();
+            if (blurVal > 0) ctx.filter = `blur(${blurVal}px)`;
+
+            const totalTextHeight = lines.length * (fontSize + LINE_GAP) - LINE_GAP;
+            let startY = (h - totalTextHeight) / 2 + fontSize;
+
+            for (const line of lines) {
+                await drawTextWithEmojis(ctx, line, PADDING, startY, fontSize, selectedTheme.text);
+                startY += fontSize + LINE_GAP;
+            }
+
+            ctx.restore();
+        }
+
+        // 🔥 RESET & DEFAULT SEKARANG JADI KOSONG
+        function renderDefault() {
+            textInput.value = '';
+            const w = SIZE, h = SIZE;
+            ctx.clearRect(0, 0, w, h);
+            ctx.fillStyle = '#ffffff'; // default white
+            ctx.fillRect(0, 0, w, h);
+        }
+
+        generateBtn.addEventListener('click', generateBrat);
+
+        resetBtn.addEventListener('click', () => {
+            textInput.value = '';
+            renderDefault();
+        });
+
+        downloadBtn.addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = `doo_bratimg.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+
+        textInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                generateBtn.click();
+            }
+        });
+
+        // Initial render (KOSONG TOTAL)
+        renderDefault();
+
+    })();
+</script>
+
+</body>
+</html>
